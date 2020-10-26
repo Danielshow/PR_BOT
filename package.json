@@ -1,0 +1,13 @@
+{
+  "name": "PR_BOT",
+  "version": "1.0.0",
+  "description": "Slack PR Bot",
+  "main": "index.js",
+  "module": "main.js",
+  "repository": "git@github.com:Danielshow/PR_BOT.git",
+  "author": "Danielshow <Danielshotonwa53@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "esm": "^3.2.25"
+  }
+}
