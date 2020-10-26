@@ -8,6 +8,12 @@
   "author": "Danielshow <Danielshotonwa53@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "esm": "^3.2.25"
+    "dotenv": "^8.2.0",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.6"
+  },
+  "scripts": {
+    "dev": "nodemon index.js"
   }
 }
