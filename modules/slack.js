@@ -11,7 +11,7 @@ const sendDirectMessage = async (userId, message, attachments=[]) => {
       }
     )
     const channel = res.data.channel.id;
-    await axios.post('https://slack.com/api/chat.postMessage', 
+    const data = await axios.post('https://slack.com/api/chat.postMessage', 
       {
         channel,
         text: message,
@@ -21,7 +21,6 @@ const sendDirectMessage = async (userId, message, attachments=[]) => {
         headers: { Authorization: `Bearer ${config.botToken}`}
       }
     );
-
   } catch (err) {
     throw err
   }

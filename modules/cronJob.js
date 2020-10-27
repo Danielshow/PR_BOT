@@ -44,7 +44,7 @@ const sendOpenPullRequestToChannel = async () => {
   for (let request of pullRequests) {
     const approved = request.pr_review.find(rev => rev.state == 'APPROVED');
     const { labels, number, user: { login }, created_at, html_url, requested_reviewers: reviewers, state: status, title } = request;
-    const reviewNames = reviewers.map(rev => `<@${githubUserToSlack[rev.toLowerCase()]}>`);
+    const reviewNames = reviewers.map(rev => `<@${githubUserToSlack[rev.login.toLowerCase()]}>`);
     const wipLabel = labels.find(lab => lab.name == 'WIP');
     const labelNames = labels.map(lab => lab.name);
     const daysOpened = moment().diff(moment(created_at), 'days');
