@@ -17,11 +17,13 @@ const getAllReviews = async (number) => {
 }
 
 // Get all Pull request
-const getAllPullRequest = async () => {
-  const { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls?sort=created&state=open', {
+const getAllPullRequest = async (date = null) => {
+  let { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls?sort=created&state=open', {
     owner: process.env.REPO_OWNER,
     repo: process.env.REPO
   });
+
+  data = data.filter(dt => date.isBefore(moment(dt.created_at)));
   await Promise.all(
     data.map(async pr => {
       const review = await getAllReviews(pr.number)
@@ -33,9 +35,7 @@ const getAllPullRequest = async () => {
 
 
 const sendOpenPullRequestToChannel = async () => {
-  // get pull request from firebase
-  const pullRequests = await getAllPullRequest();
-  console.log(pullRequests)
+  const pullRequests = await getAllPullRequest(moment().subtract(30, 'days'));
   const formedString =[
     `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      Recent Open Pull Requests
