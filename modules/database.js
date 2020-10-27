@@ -73,6 +73,10 @@ const getAllPullRequest = async () => {
   return snapShot.val()
 }
 
+const deletePullRequest = (key) => {
+  return ref.child(key).remove()
+}
+
 const checkIfPullRequestExist = async (id) => {
    const snapShot = await ref.once('value');
    const allPullRequest = snapShot.val() || []
@@ -92,5 +96,6 @@ module.exports = {
   updatePullRequestStatus,
   getAllPullRequest,
   checkIfPullRequestExist,
-  updatePullRequest
+  updatePullRequest,
+  deletePullRequest
 }
