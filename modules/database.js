@@ -1,19 +1,19 @@
 const admin = require("firebase-admin");
-const moment = require('moment');
+const moment = require("moment");
 
 const serviceAccount = require("../keys/prbot-automation-firebase-adminsdk-bsnlm-a8e334beee.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://prbot-automation.firebaseio.com/"
+  databaseURL: "https://prbot-automation.firebaseio.com/",
 });
 
 const db = admin.database();
-const ref = db.ref('/');
+const ref = db.ref("/");
 
-const savePullRequest = ({ 
-  user_id, 
-  pull_request_url, 
+const savePullRequest = ({
+  user_id,
+  pull_request_url,
   pull_id,
   status,
   labels,
@@ -23,13 +23,13 @@ const savePullRequest = ({
   pull_num,
   approval_status,
   approved_by,
-  is_approved
+  is_approved,
 }) => {
   const newData = ref.push({
     user_id,
     pull_request_url,
     pull_id,
-    status, 
+    status,
     labels,
     reviewers,
     merged_at,
@@ -38,24 +38,24 @@ const savePullRequest = ({
     approval_status,
     approved_by,
     is_approved,
-    timestamp: moment().valueOf()
+    timestamp: moment().valueOf(),
   });
   return newData.key;
-}
+};
 
 const readPullRequest = async (key) => {
-  const snapShot = await ref.child(key).once('value');
-  return snapShot.val()
-}
+  const snapShot = await ref.child(key).once("value");
+  return snapShot.val();
+};
 
 const updatePullRequestStatus = async (key, status) => {
   ref.child(key).update({ status });
-}
+};
 
 const updatePullRequest = ({
   key,
-  user_id, 
-  pull_request_url, 
+  user_id,
+  pull_request_url,
   pull_id,
   status,
   labels,
@@ -65,13 +65,13 @@ const updatePullRequest = ({
   pull_num,
   approval_status,
   approved_by,
-  is_approved
+  is_approved,
 }) => {
   ref.child(key).update({
     user_id,
     pull_request_url,
     pull_id,
-    status, 
+    status,
     labels,
     reviewers,
     merged_at,
@@ -80,31 +80,29 @@ const updatePullRequest = ({
     approval_status,
     approved_by,
     is_approved,
-    timestamp: moment().valueOf()
+    timestamp: moment().valueOf(),
   });
-}
+};
 
 const getAllPullRequest = async () => {
-  const snapShot = await ref.once('value');
-  return snapShot.val()
-}
+  const snapShot = await ref.once("value");
+  return snapShot.val();
+};
 
 const deletePullRequest = (key) => {
-  return ref.child(key).remove()
-}
+  return ref.child(key).remove();
+};
 
 const checkIfPullRequestExist = async (id) => {
-   const snapShot = await ref.once('value');
-   const allPullRequest = snapShot.val() || []
+  const snapShot = await ref.once("value");
+  const allPullRequest = snapShot.val() || [];
   for (let key of Object.keys(allPullRequest)) {
     const pull_request = allPullRequest[key];
     const { pull_id } = pull_request;
     if (id == pull_id) return key;
   }
-  return false
-}
-
-
+  return false;
+};
 
 module.exports = {
   savePullRequest,
@@ -113,5 +111,5 @@ module.exports = {
   getAllPullRequest,
   checkIfPullRequestExist,
   updatePullRequest,
-  deletePullRequest
-}
+  deletePullRequest,
+};

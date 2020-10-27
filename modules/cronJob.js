@@ -1,79 +1,109 @@
-import cron from 'node-cron';
-import moment from 'moment';
+import cron from "node-cron";
+import moment from "moment";
 import { Octokit } from "@octokit/core";
-import { githubUserToSlack } from '../utils/constants';
-import { sendMessageToChannel } from './slack';
+import { githubUserToSlack } from "../utils/constants";
+import { sendMessageToChannel } from "./slack";
 
 const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
 
 // Get all Reviews for a PR
 const getAllReviews = async (number) => {
-  const { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
-    owner: process.env.REPO_OWNER,
-    repo: process.env.REPO,
-    pull_number: number
-  })
+  const { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+    {
+      owner: process.env.REPO_OWNER,
+      repo: process.env.REPO,
+      pull_number: number,
+    }
+  );
   return data;
-}
+};
 
 // Get all Pull request
 const getAllPullRequest = async (date = null) => {
-  let { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls?sort=created&state=open', {
-    owner: process.env.REPO_OWNER,
-    repo: process.env.REPO
-  });
+  let { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}/pulls?sort=created&state=open",
+    {
+      owner: process.env.REPO_OWNER,
+      repo: process.env.REPO,
+    }
+  );
 
-  data = data.filter(dt => date.isBefore(moment(dt.created_at)));
+  data = data.filter((dt) => date.isBefore(moment(dt.created_at)));
   await Promise.all(
-    data.map(async pr => {
-      const review = await getAllReviews(pr.number)
+    data.map(async (pr) => {
+      const review = await getAllReviews(pr.number);
       pr.pr_review = review;
     })
- )
+  );
   return data;
-}
-
+};
 
 const sendOpenPullRequestToChannel = async () => {
-  const pullRequests = await getAllPullRequest(moment().subtract(30, 'days'));
-  const formedString =[
+  const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
+  const formedString = [
     `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      Recent Open Pull Requests
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n`];
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n`,
+  ];
 
   for (let request of pullRequests) {
-    const approved = request.pr_review.find(rev => rev.state == 'APPROVED');
-    const { labels, number, user: { login }, created_at, html_url, requested_reviewers: reviewers, state: status, title } = request;
-    const reviewNames = reviewers.map(rev => `<@${githubUserToSlack[rev.login.toLowerCase()]}>`);
-    const wipLabel = labels.find(lab => lab.name == 'WIP');
-    const labelNames = labels.map(lab => lab.name);
-    const daysOpened = moment().diff(moment(created_at), 'days');
+    const approved = request.pr_review.find((rev) => rev.state == "APPROVED");
+    const {
+      labels,
+      number,
+      user: { login },
+      created_at,
+      html_url,
+      requested_reviewers: reviewers,
+      state: status,
+      title,
+    } = request;
+    const reviewNames = reviewers.map(
+      (rev) => `<@${githubUserToSlack[rev.login.toLowerCase()]}>`
+    );
+    const wipLabel = labels.find((lab) => lab.name == "WIP");
+    const labelNames = labels.map((lab) => lab.name);
+    const daysOpened = moment().diff(moment(created_at), "days");
     const message = [
-      `${ number } open by <@${githubUserToSlack[login.toLowerCase()]}> on ${moment(created_at).format('YYYY-MM-DD')}
+      `${number} open by <@${
+        githubUserToSlack[login.toLowerCase()]
+      }> on ${moment(created_at).format("YYYY-MM-DD")}
          ${html_url}
          Title: ${title} 
-         Label: ${labelNames.join(', ')}
-         Reviewer: ${reviewNames.length == 1 ? reviewNames[0] : reviewNames.join(' ')}
-      `
-    ]
+         Label: ${labelNames.join(", ")}
+         Reviewer: ${
+           reviewNames.length == 1 ? reviewNames[0] : reviewNames.join(" ")
+         }
+      `,
+    ];
     if (wipLabel) {
-      message.push(":radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n")
+      message.push(
+        ":radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n"
+      );
     }
 
     if (daysOpened > 5) {
-      message.push(`:turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️`);
+      message.push(
+        `:turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️`
+      );
     }
     if (approved) {
-      const { user: { login } } = approved;
-      message.push(`:man_dancing: APPROVED BY <@${githubUserToSlack[login.toLowerCase()]}> - CONSIDER MERGING ************* :trophy:`)
+      const {
+        user: { login },
+      } = approved;
+      message.push(
+        `:man_dancing: APPROVED BY <@${
+          githubUserToSlack[login.toLowerCase()]
+        }> - CONSIDER MERGING ************* :trophy:`
+      );
     }
 
-    formedString.push(message.join(''));
+    formedString.push(message.join(""));
   }
 
   // send to slack
-  sendMessageToChannel(githubUserToSlack['devscrum'], formedString.join(''))
-
-}
+  sendMessageToChannel(githubUserToSlack["devscrum"], formedString.join(""));
+};
 
 export default sendOpenPullRequestToChannel;

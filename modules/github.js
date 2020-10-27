@@ -1,74 +1,102 @@
-import { githubUserToSlack } from '../utils/constants';
-import { savePullRequest, checkIfPullRequestExist, updatePullRequest, deletePullRequest } from './database';
-import { sendDirectMessage } from './slack';
+import { githubUserToSlack } from "../utils/constants";
+import {
+  savePullRequest,
+  checkIfPullRequestExist,
+  updatePullRequest,
+  deletePullRequest,
+} from "./database";
+import { sendDirectMessage } from "./slack";
 
 const sendMessageToReviewer = (login, url, author) => {
-   const requester = githubUserToSlack[login];
-   const pr_author = githubUserToSlack[author];
-   const attachments = [
-        {
-          text: url
-        }
-      ]
+  const requester = githubUserToSlack[login];
+  const pr_author = githubUserToSlack[author];
+  const attachments = [
+    {
+      text: url,
+    },
+  ];
 
-  sendDirectMessage(requester, `Holla!!! Your review has been requested on <@${pr_author}> PR.`, attachments);
-}
+  sendDirectMessage(
+    requester,
+    `Holla!!! Your review has been requested on <@${pr_author}> PR.`,
+    attachments
+  );
+};
 
 export default (app) => {
-  app.post('/github', async (req, res) => {
+  app.post("/github", async (req, res) => {
     const payload = JSON.parse(req.body.payload);
-    console.log(payload)
-    if (payload.action == 'review_requested') {
+    console.log(payload);
+    if (payload.action == "review_requested") {
       const pull_request = payload.pull_request;
       const reviewer = payload.requested_reviewer;
       const { login } = reviewer;
-      sendMessageToReviewer(login, pull_request.html_url, pull_request.user.login)
+      sendMessageToReviewer(
+        login,
+        pull_request.html_url,
+        pull_request.user.login
+      );
     }
     const pullRequest = payload.pull_request;
-    const { 
+    const {
       id: pull_id,
-      html_url: pull_request_url, 
+      html_url: pull_request_url,
       user: { login },
       closed_at,
       merged_at,
       requested_reviewers,
-      labels: allLabels, 
+      labels: allLabels,
       draft,
       state: status,
-      number: pull_num
+      number: pull_num,
     } = pullRequest;
 
     if (draft) return;
-    const wipLabel = allLabels.find(lab => lab.name == 'WIP');
-    if (wipLabel) return
-    const labels = allLabels.map(lab => lab.name);
-    const reviewers = requested_reviewers.map(review => githubUserToSlack[review.login.toLowerCase()]);
-    const user_id = githubUserToSlack[login.toLowerCase()]; 
+    const wipLabel = allLabels.find((lab) => lab.name == "WIP");
+    if (wipLabel) return;
+    const labels = allLabels.map((lab) => lab.name);
+    const reviewers = requested_reviewers.map(
+      (review) => githubUserToSlack[review.login.toLowerCase()]
+    );
+    const user_id = githubUserToSlack[login.toLowerCase()];
     const is_exist = await checkIfPullRequestExist(pull_id);
 
     // if it is merged or closed, delete the key
     if ((merged_at || closed_at) && is_exist) {
-      deletePullRequest(is_exist)
-      return
+      deletePullRequest(is_exist);
+      return;
     } else if (merged_at || closed_at) return;
-    let approved_by = '';
-    let approval_status = '';
-    let is_approved = false
+    let approved_by = "";
+    let approval_status = "";
+    let is_approved = false;
     if (payload.review) {
-      const { user: { login }, state } = payload.review;
-      if (state == 'approved') approved_by = githubUserToSlack[login.toLowerCase()];
+      const {
+        user: { login },
+        state,
+      } = payload.review;
+      if (state == "approved")
+        approved_by = githubUserToSlack[login.toLowerCase()];
       approval_status = state;
-      is_approved = state && state.toLowerCase() == 'approved';
+      is_approved = state && state.toLowerCase() == "approved";
       // sendMessageToUserAndOwnerOfPR
       const prOwner = pullRequest.user.login;
       const reviewer = payload.review.user.login;
       const attachments = [
         {
-          text: pull_request_url
-        }
-      ]
-      sendDirectMessage(githubUserToSlack[prOwner.toLowerCase()], `:man_dancing: Hurray!!!! You PR has been approved by <@${githubUserToSlack[reviewer.toLowerCase()]}>`, attachments);
-      sendDirectMessage(githubUserToSlack[reviewer.toLowerCase()], `:pray: Thanks for the review on ${html_url}`)
+          text: pull_request_url,
+        },
+      ];
+      sendDirectMessage(
+        githubUserToSlack[prOwner.toLowerCase()],
+        `:man_dancing: Hurray!!!! You PR has been approved by <@${
+          githubUserToSlack[reviewer.toLowerCase()]
+        }>`,
+        attachments
+      );
+      sendDirectMessage(
+        githubUserToSlack[reviewer.toLowerCase()],
+        `:pray: Thanks for the review on ${html_url}`
+      );
     }
     // update or save pull_request
     if (is_exist) {
@@ -85,8 +113,8 @@ export default (app) => {
         pull_num,
         approval_status,
         approved_by,
-        is_approved
-      }) 
+        is_approved,
+      });
     } else {
       savePullRequest({
         user_id,
@@ -100,9 +128,8 @@ export default (app) => {
         pull_num,
         approval_status,
         approved_by,
-        is_approved
+        is_approved,
       });
     }
-  })
-}
-
+  });
+};
