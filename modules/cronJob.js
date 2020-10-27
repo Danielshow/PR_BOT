@@ -39,7 +39,7 @@ const sendOpenPullRequestToChannel = async () => {
   const formedString =[
     `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      Recent Open Pull Requests
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++`];
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n`];
 
   for (let request of pullRequests) {
     const approved = request.pr_review.find(rev => rev.state == 'APPROVED');
@@ -57,11 +57,11 @@ const sendOpenPullRequestToChannel = async () => {
       `
     ]
     if (wipLabel) {
-      message.push("WIP IGNORE ******************************************* \n")
+      message.push(":radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n")
     }
 
     if (daysOpened > 5) {
-      message.push(`OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️`);
+      message.push(`:turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️`);
     }
     if (approved) {
       const { user: { login } } = approved;
@@ -72,7 +72,6 @@ const sendOpenPullRequestToChannel = async () => {
   }
 
   // send to slack
-  console.log(formedString);
   sendMessageToChannel(githubUserToSlack['devscrum'], formedString.join(''))
 
 }

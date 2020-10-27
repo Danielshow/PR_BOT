@@ -2,5 +2,5 @@
 export const githubUserToSlack = {
   danielshow: 'U01D616816Z',
   testuserbot: 'U01DCT9H0KD',
-  devscrum: 'euueueu'
+  devscrum: 'C01DF8JNQF6'
 }

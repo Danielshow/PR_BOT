@@ -29,7 +29,7 @@ const sendDirectMessage = async (userId, message, attachments=[]) => {
 
 const sendMessageToChannel = async (channel, message, attachments=[]) => {
   try {
-    await axios.post('https://slack.com/api/chat.postMessage', 
+    const res = await axios.post('https://slack.com/api/chat.postMessage', 
       {
         channel,
         text: message,
