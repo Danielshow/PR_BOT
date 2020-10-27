@@ -14,10 +14,12 @@ export default (app) => {
       requested_reviewers,
       labels: allLabels, 
       draft,
-      state: status
+      state: status,
+      number: pull_num
     } = pullRequest;
 
     if (draft) return;
+    console.log(payload)
     const wipLabel = allLabels.find(lab => lab.name == 'WIP');
     if (wipLabel) return
     const labels = allLabels.map(lab => lab.name);
@@ -30,6 +32,15 @@ export default (app) => {
       deletePullRequest(is_exist)
       return
     } else if (merged_at || closed_at) return;
+    let approved_by = '';
+    let approval_status = '';
+    let is_approved = false
+    if (payload.review) {
+      const { user: { login }, state } = payload.review;
+      if (state == 'approved') approved_by = githubUserToSlack[login.toLowerCase()];
+      approval_status = state;
+      is_approved = state == 'approved';
+    }
     // update or save pull_request
     if (is_exist) {
       updatePullRequest({
@@ -41,7 +52,11 @@ export default (app) => {
         labels,
         reviewers,
         merged_at,
-        closed_at
+        closed_at,
+        pull_num,
+        approval_status,
+        approved_by,
+        is_approved
       }) 
     } else {
       savePullRequest({
@@ -52,7 +67,11 @@ export default (app) => {
         labels,
         reviewers,
         merged_at,
-        closed_at
+        closed_at,
+        pull_num,
+        approval_status,
+        approved_by,
+        is_approved
       });
     }
     console.log('labels', labels);
