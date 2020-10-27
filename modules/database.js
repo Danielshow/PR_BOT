@@ -11,8 +11,27 @@ admin.initializeApp({
 const db = admin.database();
 const ref = db.ref('/');
 
-const savePullRequest = (user_id, pull_request_url, pull_request_id, status) => {
-  const newData = ref.push({user_id, pull_request_url, pull_request_id, status, timestamp: moment().valueOf()});
+const savePullRequest = ({ 
+  user_id, 
+  pull_request_url, 
+  pull_id,
+  status,
+  labels,
+  reviewers,
+  merged_at,
+  closed_at
+}) => {
+  const newData = ref.push({
+    user_id,
+    pull_request_url,
+    pull_id,
+    status, 
+    labels,
+    reviewers,
+    merged_at,
+    closed_at,
+    timestamp: moment().valueOf()
+  });
   return newData.key;
 }
 
@@ -25,9 +44,44 @@ const updatePullRequestStatus = async (key, status) => {
   ref.child(key).update({ status });
 }
 
+const updatePullRequest = ({
+  key,
+  user_id, 
+  pull_request_url, 
+  pull_id,
+  status,
+  labels,
+  reviewers,
+  merged_at,
+  closed_at
+}) => {
+  ref.child(key).update({
+    user_id,
+    pull_request_url,
+    pull_id,
+    status, 
+    labels,
+    reviewers,
+    merged_at,
+    closed_at,
+    timestamp: moment().valueOf()
+  });
+}
+
 const getAllPullRequest = async () => {
   const snapShot = await ref.once('value');
   return snapShot.val()
+}
+
+const checkIfPullRequestExist = async (id) => {
+   const snapShot = await ref.once('value');
+   const allPullRequest = snapShot.val() || []
+  for (let key of Object.keys(allPullRequest)) {
+    const pull_request = allPullRequest[key];
+    const { pull_id } = pull_request;
+    if (id == pull_id) return key;
+  }
+  return false
 }
 
 
@@ -36,5 +90,7 @@ module.exports = {
   savePullRequest,
   readPullRequest,
   updatePullRequestStatus,
-  getAllPullRequest
+  getAllPullRequest,
+  checkIfPullRequestExist,
+  updatePullRequest
 }
