@@ -46,5 +46,6 @@ const sendMessageToChannel = async (channel, message, attachments=[]) => {
 }
 
 module.exports = {
-  sendDirectMessage
+  sendDirectMessage,
+  sendMessageToChannel
 }

@@ -8,6 +8,7 @@
   "author": "Danielshow <Danielshotonwa53@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@octokit/core": "^3.1.4",
     "axios": "^0.21.0",
     "dotenv": "^8.2.0",
     "esm": "^3.2.25",

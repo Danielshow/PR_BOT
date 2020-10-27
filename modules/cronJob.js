@@ -1,45 +1,80 @@
 import cron from 'node-cron';
 import moment from 'moment';
-import { getAllPullRequest } from './database';
+import { Octokit } from "@octokit/core";
+import { githubUserToSlack } from '../utils/constants';
+import { sendMessageToChannel } from './slack';
+
+const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
+
+// Get all Reviews for a PR
+const getAllReviews = async (number) => {
+  const { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
+    owner: process.env.REPO_OWNER,
+    repo: process.env.REPO,
+    pull_number: number
+  })
+  return data;
+}
+
+// Get all Pull request
+const getAllPullRequest = async () => {
+  const { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls?sort=created&state=open', {
+    owner: process.env.REPO_OWNER,
+    repo: process.env.REPO
+  });
+  await Promise.all(
+    data.map(async pr => {
+      const review = await getAllReviews(pr.number)
+      pr.pr_review = review;
+    })
+ )
+  return data;
+}
+
 
 const sendOpenPullRequestToChannel = async () => {
   // get pull request from firebase
   const pullRequests = await getAllPullRequest();
+  console.log(pullRequests)
   const formedString =[
     `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     Recent Open FLMTG Pull Requests
+     Recent Open Pull Requests
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++`];
-  for (let key of Object.keys(pullRequests)) {
-    // if it is wip skip
-    const request = pullRequests[key];
-    const { labels, pull_id, user_id, timestamp, pull_request_url, reviewers, pull_num, status, is_approved } = request;
-    const reviewNames = reviewers.map(rev => `<@${rev}>`);
-    const wipLabel = labels.find(lab => lab == 'WIP');
-    if (wipLabel) return
-    const daysOpened = moment().diff(timestamp, 'days');
+
+  for (let request of pullRequests) {
+    const approved = request.pr_review.find(rev => rev.state == 'APPROVED');
+    const { labels, number, user: { login }, created_at, html_url, requested_reviewers: reviewers, state: status, title } = request;
+    const reviewNames = reviewers.map(rev => `<@${githubUserToSlack[rev.toLowerCase()]}>`);
+    const wipLabel = labels.find(lab => lab.name == 'WIP');
+    const labelNames = labels.map(lab => lab.name);
+    const daysOpened = moment().diff(moment(created_at), 'days');
     const message = [
-      `${pull_num || 1} open by <@${user_id}> on ${moment(timestamp)}
-           ${pull_request_url}
-           Label: ${labels.join(',')}
-             Reviewer: ${reviewNames.length == 1 ? reviewNames[0] : reviewNames.join(' ')}
+      `${ number } open by <@${githubUserToSlack[login.toLowerCase()]}> on ${moment(created_at).format('YYYY-MM-DD')}
+         ${html_url}
+         Title: ${title} 
+         Label: ${labelNames.join(', ')}
+         Reviewer: ${reviewNames.length == 1 ? reviewNames[0] : reviewNames.join(' ')}
       `
     ]
+    if (wipLabel) {
+      message.push("WIP IGNORE ******************************************* \n")
+    }
 
     if (daysOpened > 5) {
       message.push(`OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️`);
     }
-    if (status == 'approved' || is_approved) {
-      const { approved_by } = request;
-      message.push(`:man_dancing: APPROVED BY <@${approved_by}> - CONSIDER MERGING ************* :trophy:`)
-
+    if (approved) {
+      const { user: { login } } = approved;
+      message.push(`:man_dancing: APPROVED BY <@${githubUserToSlack[login.toLowerCase()]}> - CONSIDER MERGING ************* :trophy:`)
     }
 
-    formedString.push(message.join('\n'));
+    formedString.push(message.join(''));
   }
 
+  // send to slack
   console.log(formedString);
-  // format PR's based on days
-  // send message to channel
+  sendMessageToChannel(githubUserToSlack['devscrum'], formedString.join(''))
+
 }
 
 export default sendOpenPullRequestToChannel;
