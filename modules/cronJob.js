@@ -69,22 +69,21 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
         githubUserToSlack[login.toLowerCase()]
       }> on ${moment(created_at).format("YYYY-MM-DD")}
       ${html_url}
-      Title: ${title} 
-      Label: ${labelNames.join(", ")}
+        Title: ${title} 
+          Label: ${labelNames.join(", ")}
       Reviewer: ${
            reviewNames.length == 1 ? reviewNames[0] : reviewNames.join(" ")
          }
       \n`,
     ];
-    if (wipLabel) {
-      message.push(
-        "     :radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n"
-      );
-    }
-
     if (daysOpened > 5) {
       message.push(
-        `     :turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️ \n`
+        `   :turtle: :turtle: :turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️ \n`
+      );
+    }
+    if (wipLabel) {
+      message.push(
+        "   :radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n"
       );
     }
     if (approved) {
