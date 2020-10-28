@@ -46,7 +46,7 @@ const remindAuthorsToMergeApprovedPrs = async (approvedPrs) => {
         user_login,
         submitted_at,
       } = pr;
-      if (moment().diff(moment(submitted_at), "days") == 0) {
+      if (moment().diff(moment(submitted_at), "days") > 1) {
         const attachments = [
           {
             text: pull_request_url,
