@@ -6,6 +6,7 @@ import { githubUserToSlack } from "../utils/constants";
 import { sendDirectMessage } from "./slack";
 import moment from "moment";
 import { getAllPullRequest } from "./cronJob";
+import cron from "node-cron";
 
 const prReviews = async () => {
   const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
@@ -129,4 +130,13 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
   );
 };
 
-export default prReviews;
+// run every day of the week at 10:00 am
+cron.schedule('0 10 * * 1-5', () => {
+  console.log('Runing a job at 10:00am');
+  process.nextTick(async () => {
+    await prReviews()
+  })
+}, {
+  scheduled: true,
+  timezone: process.env.TIME_ZONE
+});

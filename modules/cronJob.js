@@ -116,5 +116,3 @@ const sendOpenPullRequestToChannel = async () => {
    scheduled: true,
    timezone: process.env.TIME_ZONE
  });
-
-export default sendOpenPullRequestToChannel;

@@ -11,101 +11,61 @@ admin.initializeApp({
 const db = admin.database();
 const ref = db.ref("/");
 
-const savePullRequest = ({
+const saveUserWhoUnsubscribed = ({
   user_id,
-  pull_request_url,
-  pull_id,
-  status,
-  labels,
-  reviewers,
-  pull_num,
-  approval_status,
-  approved_by,
-  is_approved,
-  approved_at
 }) => {
   const newData = ref.push({
     user_id,
-    pull_request_url,
-    pull_id,
-    status,
-    labels,
-    reviewers,
-    pull_num,
-    approval_status,
-    approved_by,
-    is_approved,
-    approved_at,
     timestamp: moment().valueOf(),
   });
   return newData.key;
 };
 
-const readPullRequest = async (key) => {
-  const snapShot = await ref.child(key).once("value");
-  return snapShot.val();
-};
-
-const updatePullRequestStatus = async (key, status) => {
-  ref.child(key).update({ status });
-};
-
-const updatePullRequest = ({
-  key,
-  user_id,
-  pull_request_url,
-  pull_id,
-  status,
-  labels,
-  reviewers,
-  pull_num,
-  approval_status,
-  approved_by,
-  is_approved,
-  approved_at
-}) => {
-  ref.child(key).update({
-    user_id,
-    pull_request_url,
-    pull_id,
-    status,
-    labels,
-    reviewers,
-    pull_num,
-    approval_status,
-    approved_by,
-    is_approved,
-    approved_at,
-    timestamp: moment().valueOf(),
-  });
-};
-
-const getAllPullRequest = async () => {
+const deleteUserWhoUnsubscribed = async (id) => {
+  let userKey = ''
   const snapShot = await ref.once("value");
-  return snapShot.val();
+  const allUnsubscribedUser = snapShot.val() || {};
+  for (let key of Object.keys(allUnsubscribedUser)) {
+    const user = allUnsubscribedUser[key];
+    const { user_id } = user;
+    if (id == user_id) userKey = key;
+  }
+  if (userKey) ref.child(userKey).remove();
+  return;
 };
 
-const deletePullRequest = (key) => {
-  return ref.child(key).remove();
-};
-
-const checkIfPullRequestExist = async (id) => {
+const checkIfUserHasUnsubscribed = async (id) => {
   const snapShot = await ref.once("value");
-  const allPullRequest = snapShot.val() || [];
-  for (let key of Object.keys(allPullRequest)) {
-    const pull_request = allPullRequest[key];
-    const { pull_id } = pull_request;
-    if (id == pull_id) return key;
+  const allUnsubscribedUser = snapShot.val() || [];
+  for (let key of Object.keys(allUnsubscribedUser)) {
+    const user = allUnsubscribedUser[key];
+    const { user_id } = user;
+    if (id == user_id) return key;
   }
   return false;
+}
+
+const saveFeedback = ({
+  user_id,
+  feedback
+}) => {
+  const newData = feedback.push({
+    user_id,
+    feedback,
+    timestamp: moment().valueOf(),
+  });
+  return newData.key;
+};
+
+const getAllFeedback = async () => {
+  const snapShot = await feedback.once("value");
+  return snapShot.val()
 };
 
 module.exports = {
-  savePullRequest,
-  readPullRequest,
-  updatePullRequestStatus,
-  getAllPullRequest,
-  checkIfPullRequestExist,
-  updatePullRequest,
-  deletePullRequest,
+  saveUserWhoUnsubscribed,
+  deleteUserWhoUnsubscribed,
+  checkIfUserHasUnsubscribed,
+  saveFeedback,
+  getAllFeedback,
 };

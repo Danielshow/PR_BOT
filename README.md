@@ -9,8 +9,8 @@ Slack PR Bot
 - Remind authors to merge their pull_request
 - Remind authors about WIP Prs
 - Remind users everyday on their PR reviews
+- Add a slash command for unsubscribing
 
 ### Todo
 - Remind author on their open PR's
-- Add a slash command for unsubscribing
 - Add a slash command for giving feedback

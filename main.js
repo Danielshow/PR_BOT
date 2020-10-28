@@ -1,7 +1,8 @@
 // ESM syntax is supported.
 import express from 'express';
 import githubHook from './modules/github';
-import ttt from './modules/reviews';
+import commandHook from './modules/command';
+import './modules/reviews';
 import './modules/cronJob';
 require('dotenv').config();
 
@@ -10,7 +11,7 @@ const app = express();
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 githubHook(app);
-ttt()
+commandHook(app);
 
 const PORT = process.env.PORT || 9400;
 
