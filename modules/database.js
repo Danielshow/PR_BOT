@@ -35,7 +35,7 @@ const savePullRequest = ({
     approval_status,
     approved_by,
     is_approved,
-    approved_at
+    approved_at,
     timestamp: moment().valueOf(),
   });
   return newData.key;

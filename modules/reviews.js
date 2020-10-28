@@ -2,18 +2,14 @@
 // Remind author on their open PR's
 // If it has been open for more than 2 days
 
-import { getAllPullRequest } from './database';
 import { githubUserToSlack } from '../utils/constants';
-const { sendDirectMessage } from './slack';
+import { sendDirectMessage } from './slack';
 import moment from 'moment';
+import {  } from './cronJob';
 
 const prReviews = async () => {
-  const pullRequests = await getAllPullRequest();
-  const formattedPullRequest = []
-  for (key of Object.keys(pullRequests)) {
-    formattedPullRequest.push(pullRequests[key]);
-  }
-
+  const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
+  // const approved = request.pr_review.find((rev) => rev.state == "APPROVED");
   // Get approved PRs
   const approvedPrs = formattedPullRequest.filter(pull => pull.is_approved && moment().diff(moment(pull.approved_at), "days") > 1);
   // Get Open PRs

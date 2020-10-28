@@ -7,7 +7,7 @@ import { sendMessageToChannel } from "./slack";
 const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
 
 // Get all Reviews for a PR
-const getAllReviews = async (number) => {
+export const getAllReviews = async (number) => {
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
     {
@@ -20,7 +20,7 @@ const getAllReviews = async (number) => {
 };
 
 // Get all Pull request
-const getAllPullRequest = async (date = null) => {
+export const getAllPullRequest = async (date = null) => {
   let { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/pulls?sort=created&state=open",
     {
@@ -117,3 +117,4 @@ const sendOpenPullRequestToChannel = async () => {
    timezone: process.env.TIME_ZONE
  });
 
+export default sendOpenPullRequestToChannel;
