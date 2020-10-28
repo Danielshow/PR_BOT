@@ -38,7 +38,7 @@ export const getAllPullRequest = async (date = null) => {
   return data;
 };
 
-const sendOpenPullRequestToChannel = async () => {
+const sendOpenPullRequestToChannel = async (channel = null) => {
   const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
   const formedString = [
     `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -101,7 +101,7 @@ const sendOpenPullRequestToChannel = async () => {
     formedString.push(message.join(""));
   }
   // send to slack
-  sendMessageToChannel(githubUserToSlack["devscrum"], formedString.join(""));
+  sendMessageToChannel(channel ? channel : githubUserToSlack["devscrum"], formedString.join(""));
 };
 
 // run every day of the week at 10:00 am
@@ -115,3 +115,6 @@ const sendOpenPullRequestToChannel = async () => {
    scheduled: true,
    timezone: process.env.TIME_ZONE
  });
+
+ export default sendOpenPullRequestToChannel;
+ 
