@@ -13,6 +13,11 @@ app.use(express.json());
 githubHook(app);
 commandHook(app);
 
+// keep heroku from sleeping
+app.get('/hello', (req, res) => {
+  res.json({ message: "Stop sleeping"})
+});
+
 const PORT = process.env.PORT || 9400;
 
 app.listen(PORT, () => {
