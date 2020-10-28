@@ -6,6 +6,7 @@ import {
   deletePullRequest,
 } from "./database";
 import { sendDirectMessage } from "./slack";
+import moment from 'moment';
 
 const sendMessageToReviewer = (login, url, author) => {
   const requester = githubUserToSlack[login];
@@ -69,6 +70,8 @@ export default (app) => {
     let approved_by = "";
     let approval_status = "";
     let is_approved = false;
+    let approved_at = null;
+    let last_review_time = null
     if (payload.review) {
       const {
         user: { login },
@@ -76,8 +79,10 @@ export default (app) => {
       } = payload.review;
       if (state == "approved")
         approved_by = githubUserToSlack[login.toLowerCase()];
+        approved_at = moment().valueOf()
       approval_status = state;
       is_approved = state && state.toLowerCase() == "approved";
+      last_review_time = moment().valueOf();
       // sendMessageToUserAndOwnerOfPR
       const prOwner = pullRequest.user.login;
       const reviewer = payload.review.user.login;
@@ -108,12 +113,11 @@ export default (app) => {
         status,
         labels,
         reviewers,
-        merged_at,
-        closed_at,
         pull_num,
         approval_status,
         approved_by,
         is_approved,
+        approved_at
       });
     } else {
       savePullRequest({
@@ -123,12 +127,11 @@ export default (app) => {
         status,
         labels,
         reviewers,
-        merged_at,
-        closed_at,
         pull_num,
         approval_status,
         approved_by,
         is_approved,
+        approved_at
       });
     }
   });

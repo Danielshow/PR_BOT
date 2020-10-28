@@ -18,12 +18,11 @@ const savePullRequest = ({
   status,
   labels,
   reviewers,
-  merged_at,
-  closed_at,
   pull_num,
   approval_status,
   approved_by,
   is_approved,
+  approved_at
 }) => {
   const newData = ref.push({
     user_id,
@@ -32,12 +31,11 @@ const savePullRequest = ({
     status,
     labels,
     reviewers,
-    merged_at,
-    closed_at,
     pull_num,
     approval_status,
     approved_by,
     is_approved,
+    approved_at
     timestamp: moment().valueOf(),
   });
   return newData.key;
@@ -60,12 +58,11 @@ const updatePullRequest = ({
   status,
   labels,
   reviewers,
-  merged_at,
-  closed_at,
   pull_num,
   approval_status,
   approved_by,
   is_approved,
+  approved_at
 }) => {
   ref.child(key).update({
     user_id,
@@ -74,12 +71,11 @@ const updatePullRequest = ({
     status,
     labels,
     reviewers,
-    merged_at,
-    closed_at,
     pull_num,
     approval_status,
     approved_by,
     is_approved,
+    approved_at,
     timestamp: moment().valueOf(),
   });
 };

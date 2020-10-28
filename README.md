@@ -11,4 +11,5 @@ Slack PR Bot
 
 - Remind users everyday on their PR reviews
 - Remind author on their open PR's
-
+- Add a slash command for unsubscribing
+- Add a slash command for giving feedback

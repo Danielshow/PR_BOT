@@ -106,4 +106,14 @@ const sendOpenPullRequestToChannel = async () => {
   sendMessageToChannel(githubUserToSlack["devscrum"], formedString.join(""));
 };
 
-export default sendOpenPullRequestToChannel;
+// run every day of the week at 10:00 am
+ cron.schedule('0 10 * * 1-5', () => {
+   console.log('Runing a job at 10:00am');
+   process.nextTick(() => {
+     sendOpenPullRequestToChannel()
+   })
+ }, {
+   scheduled: true,
+   timezone: process.env.TIME_ZONE
+ });
+
