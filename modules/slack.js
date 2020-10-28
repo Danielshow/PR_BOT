@@ -12,6 +12,7 @@ const sendDirectMessage = async (userId, message, attachments = []) => {
         },
       }
     );
+    console.log(userId, res)
     const channel = res.data.channel.id;
     const data = await axios.post(
       "https://slack.com/api/chat.postMessage",
