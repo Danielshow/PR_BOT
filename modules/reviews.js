@@ -15,7 +15,6 @@ const prReviews = async () => {
   const unReviewedPrs = [];
   // const approved = request.pr_review.find((rev) => rev.state == "APPROVED");
   for (let request of pullRequests) {
-    console.log(request);
     const { labels, created_at } = request;
     const lastReview = request.pr_review[request.pr_review.length - 1];
     const wipLabel = labels.find((lab) => lab.name == "WIP");
@@ -47,8 +46,7 @@ const remindAuthorsToMergeApprovedPrs = async (approvedPrs) => {
         user_login,
         submitted_at,
       } = pr;
-      console.log(moment().diff(moment(submitted_at), "days"));
-      if (moment().diff(moment(submitted_at), "days") > 1) {
+      if (moment().diff(moment(submitted_at), "days") == 0) {
         const attachments = [
           {
             text: pull_request_url,
