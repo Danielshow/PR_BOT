@@ -1,7 +1,7 @@
-const axios = require("axios");
-const config = require("../config");
+import axios from "axios";
 import { checkIfUserHasUnsubscribed } from './database';
 
+const botToken = process.env.botToken;
 export const sendDirectMessage = async (userId, message, attachments = []) => {
   try {
     if (checkIfUserHasUnsubscribed(userId)) return
@@ -10,7 +10,7 @@ export const sendDirectMessage = async (userId, message, attachments = []) => {
       { users: userId },
       {
         headers: {
-          Authorization: `Bearer ${config.botToken}`,
+          Authorization: `Bearer ${botToken}`,
         },
       }
     );
@@ -23,7 +23,7 @@ export const sendDirectMessage = async (userId, message, attachments = []) => {
         attachments: JSON.stringify(attachments),
       },
       {
-        headers: { Authorization: `Bearer ${config.botToken}` },
+        headers: { Authorization: `Bearer ${botToken}` },
       }
     );
   } catch (err) {
@@ -41,7 +41,7 @@ export const sendMessageToChannel = async (channel, message, attachments = []) =
         attachments: JSON.stringify(attachments),
       },
       {
-        headers: { Authorization: `Bearer ${config.botToken}` },
+        headers: { Authorization: `Bearer ${botToken}` },
       }
     );
   } catch (err) {
