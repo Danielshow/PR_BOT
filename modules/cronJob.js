@@ -5,7 +5,6 @@ import { githubUserToSlack } from "../utils/constants";
 import { sendMessageToChannel } from "./slack";
 
 const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
-
 // Get all Reviews for a PR
 export const getAllReviews = async (number) => {
   const { data } = await octokit.request(
@@ -22,7 +21,7 @@ export const getAllReviews = async (number) => {
 // Get all Pull request
 export const getAllPullRequest = async (date = null) => {
   let { data } = await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls?sort=created&state=open",
+    "GET /repos/{owner}/{repo}/pulls?sort=created&state=open&direction=desc",
     {
       owner: process.env.REPO_OWNER,
       repo: process.env.REPO,
@@ -43,8 +42,8 @@ const sendOpenPullRequestToChannel = async () => {
   const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
   const formedString = [
     `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     Recent Open Pull Requests
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n`,
+                    Recent Open Pull Requests                
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n`,
   ];
 
   for (let request of pullRequests) {
@@ -69,23 +68,23 @@ const sendOpenPullRequestToChannel = async () => {
       `${number} open by <@${
         githubUserToSlack[login.toLowerCase()]
       }> on ${moment(created_at).format("YYYY-MM-DD")}
-         ${html_url}
-         Title: ${title} 
-         Label: ${labelNames.join(", ")}
-         Reviewer: ${
+      ${html_url}
+      Title: ${title} 
+      Label: ${labelNames.join(", ")}
+      Reviewer: ${
            reviewNames.length == 1 ? reviewNames[0] : reviewNames.join(" ")
          }
-      `,
+      \n`,
     ];
     if (wipLabel) {
       message.push(
-        ":radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n"
+        "     :radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n"
       );
     }
 
     if (daysOpened > 5) {
       message.push(
-        `:turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️`
+        `     :turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️ \n`
       );
     }
     if (approved) {
@@ -95,13 +94,12 @@ const sendOpenPullRequestToChannel = async () => {
       message.push(
         `:man_dancing: APPROVED BY <@${
           githubUserToSlack[login.toLowerCase()]
-        }> - CONSIDER MERGING ************* :trophy:`
+        }> - CONSIDER MERGING ************* :trophy: \n`
       );
     }
 
     formedString.push(message.join(""));
   }
-
   // send to slack
   sendMessageToChannel(githubUserToSlack["devscrum"], formedString.join(""));
 };

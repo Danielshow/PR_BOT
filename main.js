@@ -4,7 +4,6 @@ import githubHook from './modules/github';
 import commandHook from './modules/command';
 import './modules/reviews';
 import './modules/cronJob';
-require('dotenv').config();
 
 const app = express();
 
