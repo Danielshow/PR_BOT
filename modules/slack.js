@@ -2,7 +2,7 @@ const axios = require("axios");
 const config = require("../config");
 import { checkIfUserHasUnsubscribed } from './database';
 
-const sendDirectMessage = async (userId, message, attachments = []) => {
+export const sendDirectMessage = async (userId, message, attachments = []) => {
   try {
     if (checkIfUserHasUnsubscribed(userId)) return
     const res = await axios.post(
@@ -31,7 +31,7 @@ const sendDirectMessage = async (userId, message, attachments = []) => {
   }
 };
 
-const sendMessageToChannel = async (channel, message, attachments = []) => {
+export const sendMessageToChannel = async (channel, message, attachments = []) => {
   try {
     const res = await axios.post(
       "https://slack.com/api/chat.postMessage",
