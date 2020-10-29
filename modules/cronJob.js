@@ -182,7 +182,7 @@ export const nudgeReviewers = (user_id, id) => {
 
 // run every day of the week at 10:00 am
 // 0 10 * * 1-5
- cron.schedule('0 10 * * 1-5', () => {
+ cron.schedule('0 9 * * 1-5', () => {
    console.log('Runing a job at 10:00am');
    process.nextTick(() => {
      sendOpenPullRequestToChannel()
