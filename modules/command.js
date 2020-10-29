@@ -1,5 +1,5 @@
 import { checkIfUserHasUnsubscribed, saveUserWhoUnsubscribed, deleteUserWhoUnsubscribed, saveFeedback } from './database';
-import sendOpenPullRequestToChannel from './cronJob';
+import sendOpenPullRequestToChannel, {nudgeReviewers} from './cronJob';
 
 export default (app) => {
   app.post("/pr-bot", async (req, res) => {
@@ -11,6 +11,10 @@ export default (app) => {
     switch (action.toLowerCase()) {
       case "list":
         message = "PR list will be posted soon"
+        break;
+      case "nudge":
+        message = `I will nudge the reviewer of PR number ${comment}`
+        break;
       case "subscribe":
         message = ":awesome: Thanks for subscribing, I will wow you !!!!!";
         break;
@@ -28,12 +32,15 @@ export default (app) => {
     // do something based on the action
     if (action.toLowerCase() == 'list') {
        sendOpenPullRequestToChannel(req.body.channel_id);
-    }
-    if (action.toLowerCase() == 'unsubscribe'){
+    } else if (action.toLowerCase() == 'unsubscribe'){
         if (await checkIfUserHasUnsubscribed(user_id)) return
         saveUserWhoUnsubscribed({ user_id });
     } else if (action.toLowerCase() == 'subscribe') {
         deleteUserWhoUnsubscribed(user_id)
+    } else if (action.toLowerCase() == 'nudge') {
+      // nudge reviewer
+      if (!comment) return
+      nudgeReviewers(user_id, comment)
     }
   });
 };

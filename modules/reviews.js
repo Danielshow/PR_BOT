@@ -111,13 +111,13 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
             githubUserToSlack[name.toLowerCase()],
             `:crying_cat_face: Holla!!!, <@${
               githubUserToSlack[login.toLowerCase()]
-            }> has been opened for over ${date_opened} days now. Please help review. Thanks.`,
+            }> Pull Request has been opened for over ${date_opened} days now. Please help review. Thanks.`,
             attachments
           );
         });
       } else if (!reviewerNames.length) {
         sendDirectMessage(
-          githubUserToSlack[name.toLowerCase()],
+          githubUserToSlack[login.toLowerCase()],
           `:pray: Holla!!! <@${
             githubUserToSlack[login.toLowerCase()]
           }>, Please assign a reviewer to your pull request.`,

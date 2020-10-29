@@ -18,6 +18,23 @@ export const getAllReviews = async (number) => {
   return data;
 };
 
+export const getPullRequestById = (id) => {
+  let { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+    {
+      owner: process.env.REPO_OWNER,
+      repo: process.env.REPO,
+      pull_number: id
+    }
+  );
+
+  if (data && !data.merged_at && !data.closed_at) {
+    const review = await getAllReviews(pr.number);
+    data.pr_review = review;
+  }
+  return data;
+}
+
 // Get all Pull request
 export const getAllPullRequest = async (date = null) => {
   let { data } = await octokit.request(
@@ -102,6 +119,46 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
   // send to slack
   sendMessageToChannel(channel ? channel : githubUserToSlack["devscrum"], formedString.join(""));
 };
+
+export const nudgeReviewers = (user_id, id) => {
+  const pr = getPullRequestById(id);
+  const {
+    user: { login },
+    pull_request_url,
+    requested_reviewers,
+  } = pr;
+  const reviewerNames = requested_reviewers.map((rev) => rev.login);
+  const attachments = [
+    {
+      text: pull_request_url,
+    },
+  ];
+  if (!reviewerNames.length) {
+    sendDirectMessage(
+      githubUserToSlack[login.toLowerCase()],
+      `:pray: Holla!!! <@${
+        githubUserToSlack[login.toLowerCase()]
+      }>, Please assign a reviewer to your pull request.`,
+      attachments
+    );
+
+    sendDirectMessage(
+      githubUserToSlack[user_id.toLowerCase()],
+      `No reviewer has been assigned to the PR, I have nudged the author instead.`,
+      attachments
+    );
+  } else {
+    reviewerNames.map((name) => {
+      sendDirectMessage(
+        githubUserToSlack[name.toLowerCase()],
+        `:computer: Holla!!!, <@${
+          githubUserToSlack[user_id.toLowerCase()]
+        }> just nudged you to review <@${githubUserToSlack[login.toLowerCase()]}> PR. Thanks.`,
+        attachments
+      );
+    });
+  }
+}
 
 // run every day of the week at 10:00 am
 // 0 10 * * 1-5
