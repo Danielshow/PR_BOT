@@ -9,32 +9,36 @@ import { getAllPullRequest } from "./cronJob";
 import cron from "node-cron";
 
 const prReviews = async () => {
-  const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
-  const approvedPrs = [];
-  const WIPPrs = [];
-  const unReviewedPrs = [];
-  // const approved = request.pr_review.find((rev) => rev.state == "APPROVED");
-  for (let request of pullRequests) {
-    const { labels, created_at } = request;
-    const lastReview = request.pr_review[request.pr_review.length - 1];
-    const wipLabel = labels.find((lab) => lab.name == "WIP");
-    if (lastReview && lastReview.state == "APPROVED") {
-      const approved = { ...lastReview, user_login: request.user.login };
-      approvedPrs.push(approved);
-    } else if (wipLabel && moment().diff(moment(created_at), "days") > 3) {
-      WIPPrs.push(request);
-    } else if (
-      !lastReview &&
-      !wipLabel &&
-      moment().diff(moment(request.created_at)) > 3
-    ) {
-      unReviewedPrs.push(request);
+  try {
+    const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
+    const approvedPrs = [];
+    const WIPPrs = [];
+    const unReviewedPrs = [];
+    // const approved = request.pr_review.find((rev) => rev.state == "APPROVED");
+    for (let request of pullRequests) {
+      const { labels, created_at } = request;
+      const lastReview = request.pr_review[request.pr_review.length - 1];
+      const wipLabel = labels.find((lab) => lab.name == "WIP");
+      if (lastReview && lastReview.state == "APPROVED") {
+        const approved = { ...lastReview, user_login: request.user.login };
+        approvedPrs.push(approved);
+      } else if (wipLabel && moment().diff(moment(created_at), "days") > 3) {
+        WIPPrs.push(request);
+      } else if (
+        !lastReview &&
+        !wipLabel &&
+        moment().diff(moment(request.created_at)) > 3
+      ) {
+        unReviewedPrs.push(request);
+      }
     }
+  
+    remindAuthorsToMergeApprovedPrs(approvedPrs);
+    nudgeAuthorsAboutWipPrs(WIPPrs);
+    nudgeReviewersToReviewPR(unReviewedPrs);
+  } catch(err){
+    console.log(err)
   }
-
-  remindAuthorsToMergeApprovedPrs(approvedPrs);
-  nudgeAuthorsAboutWipPrs(WIPPrs);
-  nudgeReviewersToReviewPR(unReviewedPrs);
 };
 
 const remindAuthorsToMergeApprovedPrs = async (approvedPrs) => {

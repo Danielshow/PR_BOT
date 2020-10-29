@@ -3,10 +3,11 @@ import moment from "moment";
 import { Octokit } from "@octokit/core";
 import { githubUserToSlack } from "../utils/constants";
 import { sendMessageToChannel } from "./slack";
+
+const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
 // Get all Reviews for a PR
 export const getAllReviews = async (number) => {
   try {
-    const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
     const { data } = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
       {
@@ -23,7 +24,6 @@ export const getAllReviews = async (number) => {
 
 export const getPullRequestById = async (id) => {
   try {
-    const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
     let { data } = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls/{pull_number}",
       {
@@ -46,8 +46,6 @@ export const getPullRequestById = async (id) => {
 // Get all Pull request
 export const getAllPullRequest = async (date = null) => {
   try {
-    console.log("process.env.GITJIRA_GIT_ACCESS_TOKEN", process.env.GITJIRA_GIT_ACCESS_TOKEN)
-    const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
     let { data } = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls?sort=created&state=open&direction=desc",
       {
@@ -71,7 +69,7 @@ export const getAllPullRequest = async (date = null) => {
 
 const sendOpenPullRequestToChannel = async (channel = null) => {
   try {
-    const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
+    const pullRequests = await getAllPullRequest(moment().subtract(30, "days")) || [];
     const formedString = [
       `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                       Recent Open Pull Requests                
@@ -102,9 +100,9 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
         }> on ${moment(created_at).format("YYYY-MM-DD")}
         ${html_url}
           Title: ${title} 
-            Label: ${labelNames.join(", ")}
+            ${labelNames.length ? "Label: " + labelNames.join(", ") : ""}
         Reviewer: ${
-             reviewNames.length == 1 ? reviewNames[0] : reviewNames.join(" ")
+             reviewNames.length ? reviewNames.join(" ") : "No reviewer Assigned"
            }
         \n`,
       ];
@@ -131,58 +129,60 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
   
       formedString.push(message.join(""));
     }
-
-    console.log(formedString)
     // send to slack
-    // sendMessageToChannel(channel ? channel : githubUserToSlack["devscrum"], formedString.join(""));
+    sendMessageToChannel(channel ? channel : githubUserToSlack["devscrum"], formedString.join(""));
   } catch (err){
     console.log(err);
   }
 };
 
 export const nudgeReviewers = (user_id, id) => {
-  const pr = getPullRequestById(id);
-  const {
-    user: { login },
-    pull_request_url,
-    requested_reviewers,
-  } = pr;
-  const reviewerNames = requested_reviewers.map((rev) => rev.login);
-  const attachments = [
-    {
-      text: pull_request_url,
-    },
-  ];
-  if (!reviewerNames.length) {
-    sendDirectMessage(
-      githubUserToSlack[login.toLowerCase()],
-      `:pray: Holla!!! <@${
-        githubUserToSlack[login.toLowerCase()]
-      }>, Please assign a reviewer to your pull request.`,
-      attachments
-    );
-
-    sendDirectMessage(
-      githubUserToSlack[user_id.toLowerCase()],
-      `No reviewer has been assigned to the PR, I have nudged the author instead.`,
-      attachments
-    );
-  } else {
-    reviewerNames.map((name) => {
+  try {
+    const pr = getPullRequestById(id) || {};
+    const {
+      user: { login },
+      pull_request_url,
+      requested_reviewers,
+    } = pr;
+    const reviewerNames = requested_reviewers.map((rev) => rev.login);
+    const attachments = [
+      {
+        text: pull_request_url,
+      },
+    ];
+    if (!reviewerNames.length) {
       sendDirectMessage(
-        githubUserToSlack[name.toLowerCase()],
-        `:computer: Holla!!!, <@${
-          githubUserToSlack[user_id.toLowerCase()]
-        }> just nudged you to review <@${githubUserToSlack[login.toLowerCase()]}> PR. Thanks.`,
+        githubUserToSlack[login.toLowerCase()],
+        `:pray: Holla!!! <@${
+          githubUserToSlack[login.toLowerCase()]
+        }>, Please assign a reviewer to your pull request.`,
         attachments
       );
-    });
+  
+      sendDirectMessage(
+        githubUserToSlack[user_id.toLowerCase()],
+        `No reviewer has been assigned to the PR, I have nudged the author instead.`,
+        attachments
+      );
+    } else {
+      reviewerNames.map((name) => {
+        sendDirectMessage(
+          githubUserToSlack[name.toLowerCase()],
+          `:computer: Holla!!!, <@${
+            githubUserToSlack[user_id.toLowerCase()]
+          }> just nudged you to review <@${githubUserToSlack[login.toLowerCase()]}> PR. Thanks.`,
+          attachments
+        );
+      });
+    }
+  } catch (err){
+    console.log(err)
   }
 }
 
 // run every day of the week at 10:00 am
 // 0 10 * * 1-5
- cron.schedule('* * * * *', () => {
+ cron.schedule('0 10 * * 1-5', () => {
    console.log('Runing a job at 10:00am');
    process.nextTick(() => {
      sendOpenPullRequestToChannel()
