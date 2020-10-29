@@ -18,7 +18,7 @@ export const getAllReviews = async (number) => {
   return data;
 };
 
-export const getPullRequestById = (id) => {
+export const getPullRequestById = async (id) => {
   let { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}",
     {
