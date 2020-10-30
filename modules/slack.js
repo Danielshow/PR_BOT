@@ -49,6 +49,20 @@ export const sendMessageToChannel = async (channel, message, attachments = []) =
   }
 };
 
+export const deleteMessage = async (channel, timestamp) => {
+  const res = await axios.post(
+    " https://slack.com/api/chat.delete",
+    {
+      channel,
+      ts: timestamp
+    },
+    {
+      headers: { Authorization: `Bearer ${botToken}` },
+    }
+  );
+  console.log(res)
+}
+
 module.exports = {
   sendDirectMessage,
   sendMessageToChannel,
