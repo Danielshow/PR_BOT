@@ -115,6 +115,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
         message.push(
           "   :radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n"
         );
+        continue;
       }
       if (approved) {
         const {
