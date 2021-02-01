@@ -137,9 +137,9 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
   }
 };
 
-export const nudgeReviewers = (user_id, id) => {
+export const nudgeReviewers = async (user_id, id) => {
   try {
-    const pr = getPullRequestById(id) || {};
+    const pr = await getPullRequestById(id) || {};
     const {
       user: { login },
       pull_request_url,
