@@ -1,4 +1,3 @@
-import { checkIfUserHasUnsubscribed, saveUserWhoUnsubscribed, deleteUserWhoUnsubscribed, saveFeedback } from './database';
 import sendOpenPullRequestToChannel, {nudgeReviewers} from './cronJob';
 
 export default (app) => {
@@ -32,11 +31,6 @@ export default (app) => {
     // do something based on the action
     if (action.toLowerCase() == 'list') {
        sendOpenPullRequestToChannel(req.body.channel_id);
-    } else if (action.toLowerCase() == 'unsubscribe'){
-        if (await checkIfUserHasUnsubscribed(user_id)) return
-        saveUserWhoUnsubscribed({ user_id });
-    } else if (action.toLowerCase() == 'subscribe') {
-        deleteUserWhoUnsubscribed(user_id)
     } else if (action.toLowerCase() == 'nudge') {
       // nudge reviewer
       if (!comment) return

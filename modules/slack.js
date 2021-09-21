@@ -1,10 +1,8 @@
 import axios from "axios";
-import { checkIfUserHasUnsubscribed } from './database';
 
 const botToken = process.env.botToken;
 export const sendDirectMessage = async (userId, message, attachments = []) => {
   try {
-    if (checkIfUserHasUnsubscribed(userId)) return
     const res = await axios.post(
       "https://slack.com/api/conversations.open",
       { users: userId },
