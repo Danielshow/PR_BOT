@@ -54,7 +54,9 @@ export const getAllPullRequest = async (date = null) => {
       }
     );
   
-    data = data.filter((dt) => date.isBefore(moment(dt.created_at)));
+    if (date) {
+      data = data.filter((dt) => date.isBefore(moment(dt.created_at)));
+    }
     await Promise.all(
       data.map(async (pr) => {
         const review = await getAllReviews(pr.number);
@@ -69,7 +71,7 @@ export const getAllPullRequest = async (date = null) => {
 
 const sendOpenPullRequestToChannel = async (channel = null) => {
   try {
-    const pullRequests = await getAllPullRequest(moment().subtract(30, "days")) || [];
+    const pullRequests = await getAllPullRequest() || [];
     const formedString = [
       `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                       Recent Open Pull Requests                
@@ -92,6 +94,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
         (rev) => `<@${githubUserToSlack[rev.login.toLowerCase()]}>`
       );
       const wipLabel = labels.find((lab) => lab.name == "WIP");
+      const holdLabel = labels.find((lab) => lab.name == "HOLD");
       const labelNames = labels.map((lab) => lab.name);
       const daysOpened = moment().diff(moment(created_at), "days");
       const message = [
@@ -111,7 +114,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
           `   :turtle: :turtle: :turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️ \n`
         );
       }
-      if (wipLabel) {
+      if (wipLabel || holdLabel) {
         message.push(
           "   :radioactive_sign: WIP IGNORE ******************************************* :no_entry: \n"
         );

@@ -19,5 +19,6 @@ export const githubUserToSlack = {
   onnassiz: "U010SHM7LLR",
   olukayodeesho: "UN30NC2UW",
   anuonifade: "U0112GRL5UM",
-  rgkeith3: "U7C3VDXFE"
+  rgkeith3: "U7C3VDXFE",
+  dependabot: 'dependabot'
 };

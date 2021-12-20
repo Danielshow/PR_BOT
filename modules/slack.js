@@ -18,7 +18,7 @@ export const sendDirectMessage = async (userId, message, attachments = []) => {
       {
         channel,
         text: message,
-        attachments: JSON.stringify(attachments),
+        attachments: attachments,
       },
       {
         headers: { Authorization: `Bearer ${botToken}` },
@@ -36,7 +36,7 @@ export const sendMessageToChannel = async (channel, message, attachments = []) =
       {
         channel,
         text: message,
-        attachments: JSON.stringify(attachments),
+        attachments: attachments,
       },
       {
         headers: { Authorization: `Bearer ${botToken}` },

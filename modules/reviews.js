@@ -10,7 +10,8 @@ import cron from "node-cron";
 
 const prReviews = async () => {
   try {
-    const pullRequests = await getAllPullRequest(moment().subtract(30, "days"));
+    // moment().subtract(30, "days")
+    const pullRequests = await getAllPullRequest();
     const approvedPrs = [];
     const WIPPrs = [];
     const unReviewedPrs = [];
