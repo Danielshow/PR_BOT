@@ -5,7 +5,7 @@ export default (app) => {
     const text = req.body.text;
     const user_id = req.body.user_id;
 
-    const [action = "", comment = ""] = text.split(" ");
+    const [action = "", comment = "", repo = ""] = text.split(" ");
     let message;
     switch (action.toLowerCase()) {
       case "list":
@@ -34,7 +34,7 @@ export default (app) => {
     } else if (action.toLowerCase() == 'nudge') {
       // nudge reviewer
       if (!comment) return
-      nudgeReviewers(user_id, comment)
+      nudgeReviewers(user_id, comment, repo)
     }
   });
 };

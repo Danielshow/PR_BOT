@@ -6,13 +6,13 @@ import { sendMessageToChannel } from "./slack";
 
 const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
 // Get all Reviews for a PR
-export const getAllReviews = async (number) => {
+export const getAllReviews = async (number, repo) => {
   try {
     const { data } = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
       {
         owner: process.env.REPO_OWNER,
-        repo: process.env.REPO,
+        repo: repo,
         pull_number: number,
       }
     );
@@ -22,13 +22,13 @@ export const getAllReviews = async (number) => {
   }
 };
 
-export const getPullRequestById = async (id) => {
+export const getPullRequestById = async (id, repo) => {
   try {
     let { data } = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls/{pull_number}",
       {
         owner: process.env.REPO_OWNER,
-        repo: process.env.REPO,
+        repo: repo,
         pull_number: id
       }
     );
@@ -45,25 +45,35 @@ export const getPullRequestById = async (id) => {
 
 // Get all Pull request
 export const getAllPullRequest = async (date = null) => {
+  const allData = [];
   try {
-    let { data } = await octokit.request(
-      "GET /repos/{owner}/{repo}/pulls?sort=created&state=open&direction=desc",
-      {
-        owner: process.env.REPO_OWNER,
-        repo: process.env.REPO,
-      }
-    );
-  
-    if (date) {
-      data = data.filter((dt) => date.isBefore(moment(dt.created_at)));
-    }
+    const repoList = process.env.REPO_LIST.split(',');
     await Promise.all(
-      data.map(async (pr) => {
-        const review = await getAllReviews(pr.number);
-        pr.pr_review = review;
+      repoList.map(async repo => {
+        let { data } = await octokit.request(
+          "GET /repos/{owner}/{repo}/pulls?sort=created&state=open&direction=desc",
+          {
+            owner: process.env.REPO_OWNER,
+            repo: repo,
+          }
+        );
+      
+        if (date) {
+          data = data.filter((dt) => date.isBefore(moment(dt.created_at)));
+        }
+        await Promise.all(
+          data.map(async (pr) => {
+            const review = await getAllReviews(pr.number, repo);
+            pr.pr_review = review;
+          })
+        );
+
+        allData.push(...data);
       })
-    );
-    return data;
+    )
+
+    allData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return allData;
   } catch (err) {
     console.log(err);
   }
@@ -71,7 +81,8 @@ export const getAllPullRequest = async (date = null) => {
 
 const sendOpenPullRequestToChannel = async (channel = null) => {
   try {
-    const pullRequests = await getAllPullRequest() || [];
+    let pullRequests = await getAllPullRequest() || [];
+    pullRequests = pullRequests.filter((dt) => moment().subtract(120, "days").isBefore(moment(dt.created_at)));
     const formedString = [
       `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                       Recent Open Pull Requests                
@@ -140,9 +151,9 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
   }
 };
 
-export const nudgeReviewers = async (user_id, id) => {
+export const nudgeReviewers = async (user_id, id, repo) => {
   try {
-    const pr = await getPullRequestById(id) || {};
+    const pr = await getPullRequestById(id, repo) || {};
     const {
       user: { login },
       pull_request_url,
