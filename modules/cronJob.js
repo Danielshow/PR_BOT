@@ -85,7 +85,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
     pullRequests = pullRequests.filter((dt) => moment().subtract(120, "days").isBefore(moment(dt.created_at)));
     const formedString = [
       `++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                      Recent Open Pull Requests                
+                      Recent Open Pull Requests (${pullRequests.length})              
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n`,
     ];
   

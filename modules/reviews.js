@@ -52,17 +52,13 @@ const remindAuthorsToMergeApprovedPrs = async (approvedPrs) => {
         submitted_at,
       } = pr;
       if (moment().diff(moment(submitted_at), "days") > 1) {
-        const attachments = [
-          {
-            text: pull_request_url,
-          },
-        ];
         await sendDirectMessage(
           githubUserToSlack[user_login.toLowerCase()],
           `:happygoat: Your PR has been approved by <@${
             githubUserToSlack[login.toLowerCase()]
-          }> for over a day. Please see to it!!!`,
-          attachments
+          }> for over a day. Please see to it!!!
+           ${pull_request_url}
+          `,
         );
       }
     })
@@ -79,15 +75,11 @@ const nudgeAuthorsAboutWipPrs = async (WipPrs) => {
       } = pr;
       const date_opened = moment().diff(moment(created_at), "days");
       if (date_opened > 3) {
-        const attachments = [
-          {
-            text: pull_request_url,
-          },
-        ];
         await sendDirectMessage(
           githubUserToSlack[login.toLowerCase()],
-          `:crying_cat_face: Your PR has been in WIP state for ${date_opened} days. Post on #devHelpline or reach out if you need help.`,
-          attachments
+          `:crying_cat_face: Your PR has been in WIP state for ${date_opened} days. Post on #devHelpline or reach out if you need help.
+            ${pull_request_url}
+          `,
         );
       }
     })
@@ -105,19 +97,15 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
       } = pr;
       const reviewerNames = requested_reviewers.map((rev) => rev.login);
       const date_opened = moment().diff(moment(created_at), "days");
-      const attachments = [
-        {
-          text: pull_request_url,
-        },
-      ];
       if (date_opened > 3 && reviewerNames.length) {
         reviewerNames.map((name) => {
           sendDirectMessage(
             githubUserToSlack[name.toLowerCase()],
             `:crying_cat_face: Holla!!!, <@${
               githubUserToSlack[login.toLowerCase()]
-            }> Pull Request has been opened for over ${date_opened} days now. Please help review. Thanks.`,
-            attachments
+            }> Pull Request has been opened for over ${date_opened} days now. Please help review. Thanks.
+             ${pull_request_url}
+            `,
           );
         });
       } else if (!reviewerNames.length) {
@@ -125,8 +113,9 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
           githubUserToSlack[login.toLowerCase()],
           `:pray: Holla!!! <@${
             githubUserToSlack[login.toLowerCase()]
-          }>, Please assign a reviewer to your pull request.`,
-          attachments
+          }>, Please assign a reviewer to your pull request.
+           ${pull_request_url}
+          `,
         );
       }
     })
@@ -134,7 +123,7 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
 };
 
 // run every day of the week at 10:00 am
-cron.schedule('45 9 * * 1-5', () => {
+cron.schedule('45 8 * * 1-5', () => {
   console.log('Runing a job at 10:00am');
   process.nextTick(async () => {
     await prReviews()
