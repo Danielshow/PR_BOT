@@ -10,5 +10,9 @@ export const githubUserToSlack = {
   kalvinhom: "U0B2JFB9U",
   olukayodeesho: "UN30NC2UW",
   rgkeith3: "U7C3VDXFE",
-  "dependabot[bot]": 'dependabot'
+  "dependabot[bot]": 'dependabot',
+  "fluxx-sleblanc": "UM3TAQV8S",
+  liuzhenwang19: "UMH6X8UTZ",
+  matthiassb: "UGMHUUT1B",
+  ABarjesteh: "UGMHUUT1B"
 };

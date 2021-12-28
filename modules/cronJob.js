@@ -50,25 +50,29 @@ export const getAllPullRequest = async (date = null) => {
     const repoList = process.env.REPO_LIST.split(',');
     await Promise.all(
       repoList.map(async repo => {
-        let { data } = await octokit.request(
-          "GET /repos/{owner}/{repo}/pulls?sort=created&state=open&direction=desc",
-          {
-            owner: process.env.REPO_OWNER,
-            repo: repo,
+        try {
+          let { data } = await octokit.request(
+            "GET /repos/{owner}/{repo}/pulls?sort=created&state=open&direction=desc",
+            {
+              owner: process.env.REPO_OWNER,
+              repo: repo,
+            }
+          );
+        
+          if (date) {
+            data = data.filter((dt) => date.isBefore(moment(dt.created_at)));
           }
-        );
-      
-        if (date) {
-          data = data.filter((dt) => date.isBefore(moment(dt.created_at)));
+          await Promise.all(
+            data.map(async (pr) => {
+              const review = await getAllReviews(pr.number, repo);
+              pr.pr_review = review;
+            })
+          );
+  
+          allData.push(...data);
+        } catch (err) {
+          console.log(repo)
         }
-        await Promise.all(
-          data.map(async (pr) => {
-            const review = await getAllReviews(pr.number, repo);
-            pr.pr_review = review;
-          })
-        );
-
-        allData.push(...data);
       })
     )
 
@@ -145,7 +149,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
       formedString.push(message.join(""));
     }
     // send to slack
-    sendMessageToChannel(channel ? channel : githubUserToSlack["devscrum"], formedString.join(""));
+    // sendMessageToChannel(channel ? channel : githubUserToSlack["devscrum"], formedString.join(""));
   } catch (err){
     console.log(err);
   }
