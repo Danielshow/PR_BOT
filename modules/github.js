@@ -1,26 +1,19 @@
-import { githubUserToSlack } from "../utils/constants";
-import { sendDirectMessage } from "./slack";
+import { githubUserToSlack } from '../utils/constants';
+import { sendDirectMessage } from './slack';
 
 const sendMessageToReviewer = (login, url, author) => {
   const requester = githubUserToSlack[login];
   const pr_author = githubUserToSlack[author];
-  const attachments = [
-    {
-      text: url,
-    },
-  ];
-
   sendDirectMessage(
     requester,
-    `Holla!!! Your review has been requested on <@${pr_author}> PR.`,
-    attachments
+    `Holla!!! Your review has been requested on <@${pr_author}> PR. ${url}`
   );
 };
 
 export default (app) => {
-  app.post("/github", async (req, res) => {
+  app.post('/github', async (req, res) => {
     const payload = JSON.parse(req.body.payload);
-    if (payload.action == "review_requested") {
+    if (payload.action == 'review_requested') {
       const pull_request = payload.pull_request;
       const reviewer = payload.requested_reviewer;
       const { login } = reviewer;
@@ -37,34 +30,26 @@ export default (app) => {
       closed_at,
       merged_at,
       labels: allLabels,
-      draft,
+      draft
     } = pullRequest;
 
     if (draft) return;
-    const wipLabel = allLabels.find((lab) => lab.name == "WIP");
+    const wipLabel = allLabels.find((lab) => lab.name == 'WIP');
     if (wipLabel) return;
     // if it is merged or closed, delete the key
     if (merged_at || closed_at) return;
     if (payload.review) {
-      const {
-        state,
-      } = payload.review;
-      is_approved = state && state.toLowerCase() == "approved";
+      const { state } = payload.review;
+      is_approved = state && state.toLowerCase() == 'approved';
       if (is_approved) {
         // sendMessageToUserAndOwnerOfPR
         const prOwner = pullRequest.user.login;
         const reviewer = payload.review.user.login;
-        const attachments = [
-          {
-            text: pull_request_url,
-          },
-        ];
         sendDirectMessage(
           githubUserToSlack[prOwner.toLowerCase()],
           `:man_dancing: Hurray!!!! You PR has been approved by <@${
             githubUserToSlack[reviewer.toLowerCase()]
-          }>`,
-          attachments
+          }> ${pull_request_url}`
         );
         sendDirectMessage(
           githubUserToSlack[reviewer.toLowerCase()],
