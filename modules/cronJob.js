@@ -151,7 +151,10 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
       formedString.push(message.join(''));
     }
     // send to slack
-    // sendMessageToChannel(channel ? channel : githubUserToSlack["devscrum"], formedString.join(""));
+    sendMessageToChannel(
+      channel ? channel : githubUserToSlack['devscrum'],
+      formedString.join('')
+    );
   } catch (err) {
     console.log(err);
   }
