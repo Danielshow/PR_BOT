@@ -53,7 +53,7 @@ export default (app) => {
         );
         sendDirectMessage(
           githubUserToSlack[reviewer.toLowerCase()],
-          `:pray: Thanks for the review on ${html_url}`
+          `:pray: Thanks for the review on ${pull_request_url}`
         );
       }
     }
