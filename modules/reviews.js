@@ -47,7 +47,7 @@ const remindAuthorsToMergeApprovedPrs = async (approvedPrs) => {
     approvedPrs.map(async (pr) => {
       const {
         user: { login },
-        pull_request_url,
+        html_url: pull_request_url,
         user_login,
         submitted_at,
       } = pr;
@@ -70,14 +70,14 @@ const nudgeAuthorsAboutWipPrs = async (WipPrs) => {
     WipPrs.map(async (pr) => {
       const {
         user: { login },
-        pull_request_url,
+        html_url: pull_request_url,
         created_at,
       } = pr;
       const date_opened = moment().diff(moment(created_at), "days");
       if (date_opened > 3) {
         await sendDirectMessage(
           githubUserToSlack[login.toLowerCase()],
-          `:crying_cat_face: Your PR has been in WIP state for ${date_opened} days. Post on #devHelpline or reach out if you need help.
+          `:crying_cat_face: Your PR has been in WIP state for ${date_opened} days. Post on #dev-helpline or reach out if you need help.
             ${pull_request_url}
           `,
         );
@@ -91,7 +91,7 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
     unReviewedPrs.map(async (pr) => {
       const {
         user: { login },
-        pull_request_url,
+        html_url: pull_request_url,
         requested_reviewers,
         created_at,
       } = pr;
