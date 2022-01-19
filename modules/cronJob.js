@@ -97,9 +97,14 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
 
     for (let request of pullRequests) {
       const approved = request.pr_review.find((rev) => rev.state == 'APPROVED');
+      const commentAndRequestChanges = request.pr_review.filter(
+        (rev) => rev.state == 'COMMENTED' || rev.state == 'CHANGES_REQUESTED'
+      );
+
       let reviewNames = request.pr_review.map(
         (r) => `<@${githubUserToSlack[r.user.login.toLowerCase()]}>`
       );
+
       const {
         labels,
         number,
@@ -134,6 +139,20 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
         }
         \n`
       ];
+
+      const MapName = {
+        COMMENTED: 'Commented on your pull request',
+        CHANGES_REQUESTED: 'Request changes on your pull request'
+      };
+      if (commentAndRequestChanges.length) {
+        commentAndRequestChanges.map(({ user: { login }, state, html_url }) => {
+          message.push(
+            `<@${githubUserToSlack[login.toLowerCase()]}>:  ${
+              MapName[state]
+            } \n`
+          );
+        });
+      }
       if (daysOpened > 5) {
         message.push(
           `   :turtle: :turtle: :turtle: OPENED MORE THAN ${daysOpened} DAYS AGO *************************** :hourglass:️ \n`
