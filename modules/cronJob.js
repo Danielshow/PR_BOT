@@ -97,6 +97,9 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
 
     for (let request of pullRequests) {
       const approved = request.pr_review.find((rev) => rev.state == 'APPROVED');
+      let reviewNames = request.pr_review.map(
+        (r) => `<@${githubUserToSlack[r.user.login.toLowerCase()]}>`
+      );
       const {
         labels,
         number,
@@ -107,9 +110,14 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
         state: status,
         title
       } = request;
-      const reviewNames = reviewers.map(
-        (rev) => `<@${githubUserToSlack[rev.login.toLowerCase()]}>`
+
+      reviewNames.push(
+        ...reviewers.map(
+          (rev) => `<@${githubUserToSlack[rev.login.toLowerCase()]}>`
+        )
       );
+
+      reviewNames = [...new Set(reviewNames)];
       const wipLabel = labels.find((lab) => lab.name == 'WIP');
       const holdLabel = labels.find((lab) => lab.name == 'HOLD');
       const labelNames = labels.map((lab) => lab.name);
