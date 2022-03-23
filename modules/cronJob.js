@@ -141,8 +141,8 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
       ];
 
       const MapName = {
-        COMMENTED: 'Commented on your pull request',
-        CHANGES_REQUESTED: 'Request changes on your pull request'
+        COMMENTED: 'Commented',
+        CHANGES_REQUESTED: 'Requested changes'
       };
       if (commentAndRequestChanges.length) {
         commentAndRequestChanges.map(({ user: { login }, state, html_url }) => {
@@ -229,7 +229,7 @@ export const nudgeReviewers = async (user_id, id, repo) => {
 // run every day of the week at 10:00 am
 // 0 10 * * 1-5
 cron.schedule(
-  '45 9 * * 1-5',
+  '45 8 * * 1-5',
   () => {
     console.log('Running a job at 9:45am');
     process.nextTick(() => {
