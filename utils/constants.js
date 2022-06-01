@@ -16,5 +16,6 @@ export const githubUserToSlack = {
   matthiassb: 'UGMHUUT1B',
   ABarjesteh: 'UGMHUUT1B',
   eamigo13: 'U02S9EZ05T7',
-  chadellison: 'U02RAEAKUN5'
+  chadellison: 'U02RAEAKUN5',
+  ermacaz: 'U03BWU46JF6'
 };
