@@ -2,8 +2,8 @@ import { githubUserToSlack } from '../utils/constants';
 import { sendDirectMessage } from './slack';
 
 const sendMessageToReviewer = (login, url, author) => {
-  const requester = githubUserToSlack[login];
-  const pr_author = githubUserToSlack[author];
+  const requester = githubUserToSlack(login);
+  const pr_author = githubUserToSlack(author);
   sendDirectMessage(
     requester,
     `Holla!!! Your review has been requested on <@${pr_author}> PR. ${url}`
@@ -46,13 +46,13 @@ export default (app) => {
         const prOwner = pullRequest.user.login;
         const reviewer = payload.review.user.login;
         sendDirectMessage(
-          githubUserToSlack[prOwner.toLowerCase()],
+          githubUserToSlack(prOwner.toLowerCase()),
           `:man_dancing: Hurray!!!! You PR has been approved by <@${
-            githubUserToSlack[reviewer.toLowerCase()]
+            githubUserToSlack(reviewer.toLowerCase())
           }> ${pull_request_url}`
         );
         sendDirectMessage(
-          githubUserToSlack[reviewer.toLowerCase()],
+          githubUserToSlack(reviewer.toLowerCase()),
           `:pray: Thanks for the review on ${pull_request_url}`
         );
       }

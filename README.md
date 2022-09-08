@@ -10,7 +10,8 @@ Slack PR Bot
 - Remind authors about WIP Prs
 - Remind users everyday on their PR reviews
 - Add a slash command for unsubscribing
+- Remind author on their open PR's
 
 ### Todo
-- Remind author on their open PR's
+
 - Add a slash command for giving feedback

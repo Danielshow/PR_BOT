@@ -53,9 +53,9 @@ const remindAuthorsToMergeApprovedPrs = async (approvedPrs) => {
       } = pr;
       if (moment().diff(moment(submitted_at), "days") > 1) {
         await sendDirectMessage(
-          githubUserToSlack[user_login.toLowerCase()],
+          githubUserToSlack(user_login.toLowerCase()),
           `:happygoat: Your PR has been approved by <@${
-            githubUserToSlack[login.toLowerCase()]
+            githubUserToSlack(login.toLowerCase())
           }> for over a day. Please see to it!!!
            ${pull_request_url}
           `,
@@ -76,7 +76,7 @@ const nudgeAuthorsAboutWipPrs = async (WipPrs) => {
       const date_opened = moment().diff(moment(created_at), "days");
       if (date_opened > 3) {
         await sendDirectMessage(
-          githubUserToSlack[login.toLowerCase()],
+          githubUserToSlack(login.toLowerCase()),
           `:crying_cat_face: Your PR has been in WIP state for ${date_opened} days. Post on #dev-helpline or reach out if you need help.
             ${pull_request_url}
           `,
@@ -100,9 +100,9 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
       if (date_opened > 3 && reviewerNames.length) {
         reviewerNames.map((name) => {
           sendDirectMessage(
-            githubUserToSlack[name.toLowerCase()],
+            githubUserToSlack(name.toLowerCase()),
             `:crying_cat_face: Holla!!!, <@${
-              githubUserToSlack[login.toLowerCase()]
+              githubUserToSlack(login.toLowerCase())
             }> Pull Request has been opened for over ${date_opened} days now. Please help review. Thanks.
              ${pull_request_url}
             `,
@@ -110,9 +110,9 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
         });
       } else if (!reviewerNames.length) {
         sendDirectMessage(
-          githubUserToSlack[login.toLowerCase()],
+          githubUserToSlack(login.toLowerCase()),
           `:pray: Holla!!! <@${
-            githubUserToSlack[login.toLowerCase()]
+            githubUserToSlack(login.toLowerCase())
           }>, Please assign a reviewer to your pull request.
            ${pull_request_url}
           `,

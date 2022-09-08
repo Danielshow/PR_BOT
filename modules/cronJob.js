@@ -102,7 +102,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
       );
 
       let reviewNames = request.pr_review.map(
-        (r) => `<@${githubUserToSlack[r.user.login.toLowerCase()]}>`
+        (r) => `<@${githubUserToSlack(r.user.login.toLowerCase())}>`
       );
 
       const {
@@ -118,7 +118,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
 
       reviewNames.push(
         ...reviewers.map(
-          (rev) => `<@${githubUserToSlack[rev.login.toLowerCase()]}>`
+          (rev) => `<@${githubUserToSlack(rev.login.toLowerCase())}>`
         )
       );
 
@@ -129,7 +129,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
       const daysOpened = moment().diff(moment(created_at), 'days');
       const message = [
         `${number} open by <@${
-          githubUserToSlack[login.toLowerCase()]
+          githubUserToSlack(login.toLowerCase())
         }> on ${moment(created_at).format('YYYY-MM-DD')}
         ${html_url}
           Title: ${title} 
@@ -147,7 +147,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
       if (commentAndRequestChanges.length) {
         commentAndRequestChanges.map(({ user: { login }, state, html_url }) => {
           message.push(
-            `<@${githubUserToSlack[login.toLowerCase()]}>:  ${
+            `<@${githubUserToSlack(login.toLowerCase())}>:  ${
               MapName[state]
             } \n`
           );
@@ -170,7 +170,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
         } = approved;
         message.push(
           `:man_dancing: APPROVED BY <@${
-            githubUserToSlack[login.toLowerCase()]
+            githubUserToSlack(login.toLowerCase())
           }> - CONSIDER MERGING ************* :trophy: \n`
         );
       }
@@ -179,7 +179,7 @@ const sendOpenPullRequestToChannel = async (channel = null) => {
     }
     // send to slack
     sendMessageToChannel(
-      channel ? channel : githubUserToSlack['devscrum'],
+      channel ? channel : githubUserToSlack('devscrum'),
       formedString.join('')
     );
   } catch (err) {
@@ -198,25 +198,25 @@ export const nudgeReviewers = async (user_id, id, repo) => {
     const reviewerNames = requested_reviewers.map((rev) => rev.login);
     if (!reviewerNames.length) {
       sendDirectMessage(
-        githubUserToSlack[login.toLowerCase()],
+        githubUserToSlack(login.toLowerCase()),
         `:pray: Holla!!! <@${
-          githubUserToSlack[login.toLowerCase()]
+          githubUserToSlack(login.toLowerCase())
         }>, Please assign a reviewer to your pull request. ${pull_request_url}`
       );
 
       sendDirectMessage(
-        githubUserToSlack[user_id.toLowerCase()],
+        githubUserToSlack(user_id.toLowerCase()),
         `No reviewer has been assigned to the PR, I have nudged the author instead. ${pull_request_url}`,
         s
       );
     } else {
       reviewerNames.map((name) => {
         sendDirectMessage(
-          githubUserToSlack[name.toLowerCase()],
+          githubUserToSlack(name.toLowerCase()),
           `:computer: Holla!!!, <@${
-            githubUserToSlack[user_id.toLowerCase()]
+            githubUserToSlack(user_id.toLowerCase())
           }> just nudged you to review <@${
-            githubUserToSlack[login.toLowerCase()]
+            githubUserToSlack(login.toLowerCase())
           }> PR. Thanks. ${pull_request_url}`
         );
       });
