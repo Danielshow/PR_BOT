@@ -13,5 +13,14 @@ Slack PR Bot
 - Remind author on their open PR's
 
 ### Todo
-
 - Add a slash command for giving feedback
+
+### How to setup
+- Copy sample_env to env
+- Add RepoList which is a comma seperated string of repository
+- Add a github username to slack user id which is in this format
+```
+danielshow,36383737337:dshow,6278282722:
+```
+- yarn install
+- yarn start
