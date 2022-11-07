@@ -12,6 +12,11 @@ Slack PR Bot
 - Add a slash command for unsubscribing
 - Remind author on their open PR's
 
+### How to use Slash command
+```
+/list -> Post Pull request to the channel
+/nudge prID RepositoryName -> Nudge Reviewer of a particular Pull request
+```
 ### Todo
 - Add a slash command for giving feedback
 
