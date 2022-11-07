@@ -123,7 +123,7 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
 };
 
 // run every day of the week at 10:00 am
-cron.schedule('45 8 * * 1-5', () => {
+cron.schedule('45 9 * * 1-5', () => {
   console.log('Runing a job at 10:00am');
   process.nextTick(async () => {
     await prReviews()
