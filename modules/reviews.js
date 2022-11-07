@@ -8,6 +8,7 @@ import moment from "moment";
 import { getAllPullRequest } from "./cronJob";
 import cron from "node-cron";
 
+const cronTime = process.env.CRON_TIME || 9;
 const prReviews = async () => {
   try {
     // moment().subtract(30, "days")
@@ -123,9 +124,10 @@ const nudgeReviewersToReviewPR = async (unReviewedPrs) => {
 };
 
 // run every day of the week at 10:00 am
-cron.schedule('45 9 * * 1-5', () => {
+cron.schedule(`45 ${cronTime} * * 1-5`, () => {
   console.log('Runing a job at 10:00am');
   process.nextTick(async () => {
+    console.log(`Running a job for ${cronTime} for PR reviews`);
     await prReviews()
   })
 }, {

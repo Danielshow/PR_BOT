@@ -4,6 +4,7 @@ import { Octokit } from '@octokit/core';
 import { githubUserToSlack } from '../utils/constants';
 import { sendMessageToChannel } from './slack';
 
+const cronTime = process.env.CRON_TIME || 9;
 const octokit = new Octokit({ auth: process.env.GITJIRA_GIT_ACCESS_TOKEN });
 // Get all Reviews for a PR
 export const getAllReviews = async (number, repo) => {
@@ -229,9 +230,9 @@ export const nudgeReviewers = async (user_id, id, repo) => {
 // run every day of the week at 10:00 am
 // 0 10 * * 1-5
 cron.schedule(
-  '45 9 * * 1-5',
+  `45 ${cronTime} * * 1-5`,
   () => {
-    console.log('Running a job at 9:45am');
+    console.log(`Running a job at ${cronTime}:45am`);
     process.nextTick(() => {
       sendOpenPullRequestToChannel();
     });
