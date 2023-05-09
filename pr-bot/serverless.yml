@@ -1,0 +1,16 @@
+service: pr-bot
+
+frameworkVersion: '2 || 3'
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  cronHandler:
+    handler: handler.pr_bot_run
+    events:
+      # Invoke Lambda function every 45 mins by 9am from Mon-Fri
+      - schedule: cron(45 9 ? * MON-FRI *)
+
+plugins:
+  - serverless-better-credentials

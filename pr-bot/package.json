@@ -1,0 +1,14 @@
+{
+  "name": "pr-bot",
+  "version": "1.0.0",
+  "description": "PR bot with schedule",
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@octokit/core": "^3.1.4",
+    "axios": "^0.21.0",
+    "dayjs": "^1.11.7",
+    "dotenv": "^16.0.3"
+  }
+}
